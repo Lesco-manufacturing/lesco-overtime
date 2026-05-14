@@ -97,10 +97,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <label>Requested by <span style="color:#ef4444">*</span></label>
       <select class="key" id="req-by" onchange="onReqChange(); clearInvalid(this)">
         <option value="">Select name...</option>
-        <option value="Vincent Chidi|Production Manager|SP">Vincent Chidi</option>
-        <option value="Xolani Mchunu|IS Warehouse Manager|IS Warehouse">Xolani Mchunu</option>
-        <option value="Steven Moya|FG Warehouse Manager|FG Warehouse">Steven Moya</option>
-        <option value="Wayne Erasmus|Production Manager (Switch King)|Switch King">Wayne Erasmus</option>
+        <option value="Vincent Chidi|Production Manager|SP|27766364819">Vincent Chidi</option>
+        <option value="Xolani Mchunu|IS Warehouse Manager|IS Warehouse|27834952980">Xolani Mchunu</option>
+        <option value="Steven Moya|FG Warehouse Manager|FG Warehouse|27768036478">Steven Moya</option>
+        <option value="Wayne Erasmus|Production Manager (Switch King)|Switch King|27716757924">Wayne Erasmus</option>
       </select>
     </div>
 
@@ -321,7 +321,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxCXahUUXW3Q6I2ayHoctfcfixCf3LenJLGWk18Mykef4kFw1cPCgA1HttzLj3LzifG/exec';
 // ─────────────────────────────────────────────────────────────────────────────
 
-let requests = [];
+// ── Local storage persistence ─────────────────────────────────────────────
+const STORAGE_KEY = 'lesco_ot_requests';
+
+function loadRequests() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch(e) { return []; }
+}
+
+function saveRequests() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(requests));
+  } catch(e) {}
+}
+
+let requests = loadRequests();
 
 // Auto-fill today's date
 const today = new Date();
@@ -329,6 +345,9 @@ document.getElementById('ot-date').value = today.toISOString().slice(0, 10);
 
 // Trigger initial calc with defaults already set in HTML
 calcHours();
+
+// Render any persisted log entries on load
+renderLog();
 
 // ── Name → role + department auto-map ────────────────────────────────────────
 function onReqChange() {
@@ -412,8 +431,9 @@ function validateForm() {
 function buildReqObject() {
   const raw   = document.getElementById('req-by').value;
   const parts = raw.split('|');
-  const reqName = parts[0] || '';
-  const reqRole = parts[1] || '';
+  const reqName  = parts[0] || '';
+  const reqRole  = parts[1] || '';
+  const reqPhone = parts[3] || '';
   const approverRaw = document.getElementById('approver').value;
   // FIX: future-proofed for Name|Role|phone format
   const approverParts = approverRaw.split('|');
@@ -445,6 +465,7 @@ function buildReqObject() {
     reason:        document.getElementById('ot-reason').value.trim(),
     targetOutput:  document.getElementById('target-units').value,
     approverName, approverRole,
+    reqPhone,
     notes:         document.getElementById('ot-notes').value.trim(),
     status:        'Pending',
     submittedAt:   timeStr,
@@ -473,6 +494,7 @@ async function submitRequest() {
   try {
     await postToSheet(req);
     requests.unshift(req);
+    saveRequests();
     renderLog();
     setSubmitting(false);
     document.getElementById('success-detail').textContent =
@@ -485,6 +507,7 @@ async function submitRequest() {
     document.getElementById('error-msg').textContent = 'Could not reach Google Sheet. Request saved locally only.';
     document.getElementById('error-msg').style.display = 'block';
     requests.unshift(req);
+    saveRequests();
     renderLog();
   }
 }
@@ -503,10 +526,8 @@ async function submitAndWhatsApp() {
   }
 
   requests.unshift(req);
+  saveRequests();
   renderLog();
-  setSubmitting(false);
-
-  const msg = buildWAMessage(req);
   document.getElementById('wa-preview-text').textContent = msg;
   document.getElementById('wa-preview-box').style.display = 'block';
 
@@ -542,8 +563,11 @@ function resetFormFields() {
   document.getElementById('target-units').value = '';
 }
 
-// ── WhatsApp message builder ──────────────────────────────────────────────────
+// ── WhatsApp message builder ──────────────────────────────────────────────
 function buildWAMessage(req) {
+  const approveUrl = `${APPS_SCRIPT_URL}?action=approve&rowId=${req.id}`;
+  const declineUrl = `${APPS_SCRIPT_URL}?action=decline&rowId=${req.id}`;
+
   let msg = `*LESCO MANUFACTURING*\n*Overtime Approval Request*\n`;
   msg += `━━━━━━━━━━━━━━━━━\n`;
   msg += `📅 Date of OT: ${req.otDateFmt}\n`;
@@ -561,7 +585,11 @@ function buildWAMessage(req) {
   msg += `⏳ Approver: ${req.approverName} (${req.approverRole})\n`;
   msg += `📋 Status: *Pending approval*\n`;
   if (req.notes) msg += `\n📎 Notes: ${req.notes}\n`;
-  msg += `\nSubmitted: ${req.submittedAt} on ${req.submittedDate}`;
+  msg += `\nSubmitted: ${req.submittedAt} on ${req.submittedDate}\n`;
+  msg += `\n━━━━━━━━━━━━━━━━━\n`;
+  msg += `*TAP TO RESPOND:*\n`;
+  msg += `✅ Approve: ${approveUrl}\n`;
+  msg += `❌ Decline: ${declineUrl}`;
   return msg;
 }
 
@@ -628,8 +656,9 @@ function exportCSV() {
 
 function clearLog() {
   if (!requests.length) return;
-  if (!confirm('Clear all ' + requests.length + ' requests from this session?')) return;
+  if (!confirm('Clear all ' + requests.length + ' requests from this device?')) return;
   requests = [];
+  localStorage.removeItem(STORAGE_KEY);
   document.getElementById('wa-preview-box').style.display = 'none';
   renderLog();
 }
