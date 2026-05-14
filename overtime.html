@@ -519,33 +519,34 @@ async function submitAndWhatsApp() {
   const req = buildReqObject();
   setSubmitting(true);
 
-  try {
-    await postToSheet(req);
-  } catch(err) {
-    // Log failure but don't block WA send — request saved locally
-  }
-
-  requests.unshift(req);
-  saveRequests();
-  renderLog();
+  const msg = buildWAMessage(req);
   document.getElementById('wa-preview-text').textContent = msg;
   document.getElementById('wa-preview-box').style.display = 'block';
 
-  // FIX: phone number to be added later per approver
-  // Future format: const phone = approverParts[2]; wa.me/${phone}?text=...
+  // Build WA URL
   const approverParts = document.getElementById('approver').value.split('|');
-  const phone = approverParts[2] || ''; // empty until numbers are added
+  const phone = approverParts[2] || '';
   const waUrl = phone
     ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
     : `https://wa.me/?text=${encodeURIComponent(msg)}`;
 
+  // Open WhatsApp immediately — don't wait for Sheet
   window.open(waUrl, '_blank');
 
+  // Update UI straight away
+  requests.unshift(req);
+  saveRequests();
+  renderLog();
+  setSubmitting(false);
+
   document.getElementById('success-detail').textContent =
-    req.reqName + ' — ' + req.otDateFmt + ' — Logged &amp; WhatsApp opened';
+    req.reqName + ' — ' + req.otDateFmt + ' — Logged & WhatsApp opened';
   document.getElementById('success-msg').style.display = 'block';
   setTimeout(() => { document.getElementById('success-msg').style.display = 'none'; }, 6000);
   resetFormFields();
+
+  // Post to Sheet silently in background
+  postToSheet(req).catch(() => {});
 }
 
 function setSubmitting(state) {
