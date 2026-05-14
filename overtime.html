@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Lesco Overtime Request</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1a1a1a;padding-bottom:40px}
+.header{background:#131929;padding:16px;position:sticky;top:0;z-index:100}
+.header-row{display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:17px;font-weight:600;color:#fff}
+.header-time{font-size:13px;color:#4DC8D0;font-weight:500}
+.header-date{font-size:12px;color:#888;margin-top:2px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:#fff;border-bottom:1px solid #e5e7eb;position:sticky;top:73px;z-index:99}
+.tab{padding:12px;text-align:center;font-size:14px;font-weight:500;color:#6b7280;border:none;background:transparent;cursor:pointer;border-bottom:3px solid transparent}
+.tab.active{color:#131929;border-bottom-color:#131929}
+.pane{padding:12px}
+.section{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.section-title{font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:13px;font-weight:500;color:#374151;margin-bottom:6px}
+.field select,.field input,.field textarea{width:100%;font-size:16px;padding:11px 13px;border:1.5px solid #e5e7eb;border-radius:8px;background:#fff;color:#111;-webkit-appearance:none;appearance:none;outline:none;transition:border-color .15s}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:38px}
+.field select:focus,.field input:focus,.field textarea:focus{border-color:#131929}
+.field select.key{font-size:17px;font-weight:600;color:#111}
+.field input.key{font-size:17px;font-weight:600;color:#111}
+.field input.num{font-size:26px;font-weight:700;text-align:center;padding:14px;color:#131929}
+.field textarea{resize:none;font-size:14px;line-height:1.5}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.auto-chip{background:#f9fafb;border-radius:8px;padding:10px 12px;text-align:center;border:1.5px solid #e5e7eb}
+.auto-lbl{font-size:11px;color:#9ca3af;margin-bottom:2px}
+.auto-val{font-size:26px;font-weight:700;color:#131929}
+.role-chip{font-size:13px;color:#6b7280;padding:10px 13px;background:#f9fafb;border-radius:8px;border:1.5px solid #e5e7eb}
+.approval-strip{background:#f9fafb;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-top:12px;border:1.5px solid #e5e7eb}
+.av-circle{width:36px;height:36px;border-radius:50%;background:#EEEDFE;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#3C3489;flex-shrink:0}
+.av-info{flex:1;min-width:0}
+.av-name{font-size:14px;font-weight:600;color:#111}
+.av-role{font-size:12px;color:#6b7280}
+.av-badge{font-size:11px;padding:3px 10px;border-radius:20px;background:#FFF3CD;color:#856404;font-weight:600;flex-shrink:0;border:1px solid #FFD966}
+.summary-card{background:#F0FDF4;border-radius:10px;padding:14px;border:1px solid #86EFAC}
+.s-row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px solid #D1FAE5}
+.s-row:last-child{border-bottom:none;font-weight:600;padding-top:10px;margin-top:2px}
+.s-lbl{font-size:13px;color:#166534;flex-shrink:0;margin-right:8px}
+.s-val{font-size:13px;font-weight:500;color:#14532D;text-align:right}
+.btn{width:100%;padding:15px;font-size:16px;font-weight:600;border-radius:10px;border:none;cursor:pointer;transition:opacity .15s;color:#fff;margin-top:4px}
+.btn:active{opacity:.82}
+.btn-submit{background:#131929}
+.btn-wa{background:#25D366;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+.btn-outline{background:transparent;border:1.5px solid #e5e7eb;color:#374151;font-size:14px;padding:11px;border-radius:8px;width:100%;cursor:pointer}
+.btn-danger{background:transparent;border:1.5px solid #fca5a5;color:#dc2626;font-size:14px;padding:11px;border-radius:8px;width:100%;cursor:pointer}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.success{background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px;text-align:center;margin-bottom:12px}
+.success-title{font-size:15px;font-weight:600;color:#166534}
+.success-sub{font-size:12px;color:#16a34a;margin-top:3px}
+.error{background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:#dc2626;font-weight:500}
+.sending{background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;padding:14px;text-align:center;margin-bottom:12px;font-size:14px;color:#1d4ed8}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(29,78,216,.3);border-top-color:#1d4ed8;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.log-entry{background:#f8fafc;border-radius:10px;padding:12px 14px;margin-bottom:10px;border-left:3px solid #131929}
+.log-time{font-size:11px;color:#9ca3af;margin-bottom:4px}
+.log-title{font-size:14px;font-weight:600;color:#111;margin-bottom:6px}
+.log-pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{font-size:11px;padding:3px 9px;border-radius:20px;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0}
+.pill.pending{background:#FFF3CD;color:#856404;border-color:#FFD966}
+.empty{text-align:center;padding:40px 16px;color:#9ca3af;font-size:14px}
+.wa-preview{background:#dcfce7;border-radius:10px;padding:14px;font-size:12px;color:#14532d;white-space:pre-wrap;line-height:1.65;font-family:monospace;margin-bottom:10px;border:1px solid #86efac;word-break:break-word}
+.field input.invalid, .field select.invalid, .field textarea.invalid{border-color:#ef4444}
+.hint{font-size:11px;color:#9ca3af;margin-top:4px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-row">
+    <h1>Overtime request</h1>
+    <span class="header-time" id="clock">--:--</span>
+  </div>
+  <div class="header-date" id="dateline"></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" id="tab-form" onclick="showTab('form')">New request</button>
+  <button class="tab" id="tab-log" onclick="showTab('log')">Request log <span id="log-count" style="font-size:11px;color:#9ca3af"></span></button>
+</div>
+
+<div id="pane-form" class="pane">
+
+  <div class="section">
+    <div class="section-title">👤 Who is requesting</div>
+
+    <!-- Line leaders dropdown — Name|Role|Department -->
+    <div class="field">
+      <label>Requested by <span style="color:#ef4444">*</span></label>
+      <select class="key" id="req-by" onchange="onReqChange(); clearInvalid(this)">
+        <option value="">Select name...</option>
+        <option value="Vincent Chidi|Production Manager|SP">Vincent Chidi</option>
+        <option value="Xolani Mchunu|IS Warehouse Manager|IS Warehouse">Xolani Mchunu</option>
+        <option value="Steven Moya|FG Warehouse Manager|FG Warehouse">Steven Moya</option>
+        <option value="Wayne Erasmus|Production Manager (Switch King)|Switch King">Wayne Erasmus</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Role</label>
+      <div class="role-chip" id="role-display">—</div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Department <span style="color:#ef4444">*</span></label>
+        <select id="dept" onchange="clearInvalid(this)">
+          <option value="">Select...</option>
+          <option value="SP">SP</option>
+          <option value="CR">CR</option>
+          <option value="Switch King">Switch King</option>
+          <option value="FG Warehouse">FG Warehouse</option>
+          <option value="IS Warehouse">IS Warehouse</option>
+        </select>
+      </div>
+
+    <div class="field">
+      <label>Production line</label>
+      <select id="line-sel">
+        <option value="N/A">N/A</option>
+        <option value="SP Line 1">SP Line 1</option>
+        <option value="SP Line 2">SP Line 2</option>
+        <option value="SP Line 3">SP Line 3</option>
+        <option value="SP Line 4">SP Line 4</option>
+        <option value="CR Line 1">CR Line 1</option>
+        <option value="CR Line 2">CR Line 2</option>
+        <option value="CR Line 3">CR Line 3</option>
+        <option value="CR Line 4">CR Line 4</option>
+        <option value="CR Line 5">CR Line 5</option>
+        <option value="CR Line 6">CR Line 6</option>
+        <option value="CR Line 7">CR Line 7</option>
+        <option value="CR Line 8">CR Line 8</option>
+        <option value="CR Line 9">CR Line 9</option>
+        <option value="Automation Line">Automation Line</option>
+        <option value="Switch King Line">Switch King Line</option>
+        <option value="Warehouse — IS">Warehouse — IS</option>
+        <option value="Warehouse — FG">Warehouse — FG</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Overtime date <span style="color:#ef4444">*</span></label>
+      <!-- FIX: date input now validated before submit -->
+      <input type="date" id="ot-date" onchange="clearInvalid(this)">
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⏰ Hours &amp; staffing</div>
+    <div class="row2">
+      <div class="field">
+        <label>Start time</label>
+        <select id="start-time" onchange="calcHours()">
+          <option value="06:00">06:00</option>
+          <option value="07:00" selected>07:00</option>
+          <option value="08:00">08:00</option>
+          <option value="09:00">09:00</option>
+          <option value="13:00">13:00</option>
+          <option value="14:00">14:00</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>End time</label>
+        <select id="end-time" onchange="calcHours()">
+          <option value="09:00">09:00</option>
+          <option value="10:00">10:00</option>
+          <option value="11:00">11:00</option>
+          <option value="12:00">12:00</option>
+          <option value="13:00" selected>13:00</option>
+          <option value="14:00">14:00</option>
+          <option value="15:00">15:00</option>
+          <option value="16:00">16:00</option>
+          <option value="17:00">17:00</option>
+          <option value="18:00">18:00</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Hours planned</label>
+        <div class="auto-chip" id="hours-chip">
+          <div class="auto-lbl">Auto-calculated</div>
+          <div class="auto-val" id="hours-val">6 hrs</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Number of staff</label>
+        <select id="staff-count" onchange="calcHours()">
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+          <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+          <option value="7">7</option><option value="8" selected>8</option><option value="9">9</option>
+          <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+          <option value="15">15</option><option value="20">20</option><option value="25">25</option>
+          <option value="30">30</option><option value="40">40</option><option value="50">50</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Total man-hours</label>
+      <div class="auto-chip">
+        <div class="auto-lbl">Hours × staff (auto)</div>
+        <div class="auto-val" id="manhours-val">48 hrs</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Reason for overtime</div>
+    <div class="field">
+      <label>Category <span style="color:#ef4444">*</span></label>
+      <select id="ot-category" onchange="clearInvalid(this)">
+        <option value="">Select reason...</option>
+        <option value="Customer backorder">Customer backorder</option>
+        <option value="Production shortfall">Production shortfall</option>
+        <option value="Stock build-up">Stock build-up</option>
+        <option value="Urgent customer order">Urgent customer order</option>
+        <option value="Machine downtime recovery">Machine downtime recovery</option>
+        <option value="Quality rework">Quality rework</option>
+        <option value="Stocktake">Stocktake</option>
+        <option value="Month-end output target">Month-end output target</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Details</label>
+      <textarea id="ot-reason" rows="3" placeholder="Describe why overtime is needed..."></textarea>
+    </div>
+    <div class="field">
+      <label>Target output</label>
+      <select id="target-units">
+        <option value="">Select range...</option>
+        <option value="1–50 units">1–50 units</option>
+        <option value="50–100 units">50–100 units</option>
+        <option value="100–200 units">100–200 units</option>
+        <option value="200–400 units">200–400 units</option>
+        <option value="400–600 units">400–600 units</option>
+        <option value="600+ units">600+ units</option>
+        <option value="N/A — non-production">N/A — non-production</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">✅ Approval</div>
+    <div class="field">
+      <label>Approved by <span style="color:#ef4444">*</span></label>
+      <select class="key" id="approver" onchange="onApproverChange(); clearInvalid(this)">
+        <option value="">Select approver...</option>
+        <!-- FIX: phone numbers to be added here later in format: Name|Role|27XXXXXXXXXX -->
+        <option value="Darryl Ireland|Operations Executive">Darryl Ireland</option>
+        <option value="Jonathan Shapiro|CEO">Jonathan Shapiro</option>
+        <option value="Reuben Helberg|Supply Chain Manager">Reuben Helberg</option>
+      </select>
+    </div>
+    <div class="approval-strip" id="approver-strip">
+      <div class="av-circle" id="av-initials">?</div>
+      <div class="av-info">
+        <div class="av-name" id="av-name">—</div>
+        <div class="av-role" id="av-role">Select approver above</div>
+      </div>
+      <span class="av-badge" id="av-status">Pending</span>
+    </div>
+    <div class="field" style="margin-top:14px">
+      <label>Notes</label>
+      <textarea id="ot-notes" rows="2" placeholder="Any relevant context for the approver..."></textarea>
+    </div>
+  </div>
+
+  <div id="success-msg" style="display:none">
+    <div class="success">
+      <div class="success-title">✓ Request submitted &amp; logged</div>
+      <div class="success-sub" id="success-detail"></div>
+    </div>
+  </div>
+  <div id="error-msg" style="display:none" class="error"></div>
+  <div id="sending-msg" style="display:none" class="sending"><span class="spinner"></span>Submitting request...</div>
+
+  <button class="btn btn-submit" id="btn-submit" onclick="submitRequest()">Submit overtime request</button>
+  <!-- FIX: WA button now logs to sheet THEN opens WhatsApp -->
+  <button class="btn btn-wa" id="btn-wa" onclick="submitAndWhatsApp()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+    Log &amp; send approval via WhatsApp
+  </button>
+
+</div>
+
+<div id="pane-log" class="pane" style="display:none">
+
+  <div id="log-summary" style="display:none">
+    <div class="section">
+      <div class="section-title">📊 Session log</div>
+      <div id="wa-preview-box" style="display:none">
+        <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:6px">WhatsApp preview</div>
+        <div class="wa-preview" id="wa-preview-text"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-outline" onclick="exportCSV()">⬇ Export CSV</button>
+        <button class="btn-danger" onclick="clearLog()">🗑 Clear log</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="log-entries"></div>
+  <div class="empty" id="log-empty">
+    <div style="font-size:40px;margin-bottom:8px">📋</div>
+    No requests yet this session.
+  </div>
+
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby71kaAhPe9yFrV0o8msC_YcDgPzU0MB6Spg0fHD-AtxbdGL5lXNfjZYiBOASD3TzWe/exec';
+// ─────────────────────────────────────────────────────────────────────────────
+
+let requests = [];
+
+// Auto-fill today's date
+const today = new Date();
+document.getElementById('ot-date').value = today.toISOString().slice(0, 10);
+
+// Trigger initial calc with defaults already set in HTML
+calcHours();
+
+// ── Name → role + department auto-map ────────────────────────────────────────
+function onReqChange() {
+  const raw  = document.getElementById('req-by').value;
+  const parts = raw ? raw.split('|') : [];
+  const role = parts[1] || '—';
+  const dept = parts[2] || '';
+  document.getElementById('role-display').textContent = role;
+  if (dept) document.getElementById('dept').value = dept;
+}
+
+function onApproverChange() {
+  const raw = document.getElementById('approver').value;
+  // FIX: future format will be Name|Role|phone — safe to split on | and take first two parts
+  const parts = raw ? raw.split('|') : [];
+  const name = parts[0] || '—';
+  const role = parts[1] || '—';
+  document.getElementById('av-name').textContent = name;
+  document.getElementById('av-role').textContent = role;
+  const initials = name.split(' ').map(w => w[0] || '').join('').toUpperCase().slice(0, 2);
+  document.getElementById('av-initials').textContent = initials || '?';
+}
+
+// ── Hours calculation ─────────────────────────────────────────────────────────
+function calcHours() {
+  const st    = document.getElementById('start-time').value;
+  const et    = document.getElementById('end-time').value;
+  const staff = parseInt(document.getElementById('staff-count').value) || 0;
+  const sm    = Number(st.split(':')[0]) * 60 + Number(st.split(':')[1]);
+  const em    = Number(et.split(':')[0]) * 60 + Number(et.split(':')[1]);
+  // FIX: rounded to 2 decimal places to avoid float precision issues
+  const hrs   = Math.round(Math.max(0, (em - sm) / 60) * 100) / 100;
+  document.getElementById('hours-val').textContent    = hrs > 0 ? hrs + ' hrs' : '—';
+  document.getElementById('manhours-val').textContent = hrs > 0 ? (Math.round(hrs * staff * 100) / 100) + ' hrs' : '—';
+}
+
+// ── Validation helper ─────────────────────────────────────────────────────────
+function clearInvalid(el) {
+  el.classList.remove('invalid');
+}
+
+function validateForm() {
+  let valid = true;
+  const checks = [
+    { id: 'req-by',       test: v => v !== '',               msg: 'Please select who is requesting.' },
+    { id: 'dept',         test: v => v !== '',               msg: 'Please select a department.' },
+    { id: 'ot-date',      test: v => v !== '',               msg: 'Please select the overtime date.' },
+    { id: 'ot-category',  test: v => v !== '',               msg: 'Please select a reason category.' },
+    { id: 'approver',     test: v => v !== '',               msg: 'Please select an approver.' },
+  ];
+
+  // FIX: validate hours > 0 (catches start >= end scenario)
+  const st = document.getElementById('start-time').value;
+  const et = document.getElementById('end-time').value;
+  const sm = Number(st.split(':')[0]) * 60 + Number(st.split(':')[1]);
+  const em = Number(et.split(':')[0]) * 60 + Number(et.split(':')[1]);
+  if (em <= sm) {
+    document.getElementById('error-msg').textContent = 'End time must be later than start time.';
+    document.getElementById('error-msg').style.display = 'block';
+    return false;
+  }
+
+  for (const c of checks) {
+    const el = document.getElementById(c.id);
+    if (!c.test(el.value)) {
+      el.classList.add('invalid');
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById('error-msg').textContent = c.msg;
+      document.getElementById('error-msg').style.display = 'block';
+      valid = false;
+      break;
+    }
+  }
+  if (valid) {
+    document.getElementById('error-msg').style.display = 'none';
+  }
+  return valid;
+}
+
+// ── Build request object ──────────────────────────────────────────────────────
+function buildReqObject() {
+  const raw   = document.getElementById('req-by').value;
+  const parts = raw.split('|');
+  const reqName = parts[0] || '';
+  const reqRole = parts[1] || '';
+  const approverRaw = document.getElementById('approver').value;
+  // FIX: future-proofed for Name|Role|phone format
+  const approverParts = approverRaw.split('|');
+  const approverName  = approverParts[0] || '—';
+  const approverRole  = approverParts[1] || '—';
+
+  const st    = document.getElementById('start-time').value;
+  const et    = document.getElementById('end-time').value;
+  const staff = parseInt(document.getElementById('staff-count').value) || 0;
+  const sm    = Number(st.split(':')[0]) * 60 + Number(st.split(':')[1]);
+  const em    = Number(et.split(':')[0]) * 60 + Number(et.split(':')[1]);
+  // FIX: clean float
+  const hrs   = Math.round(Math.max(0, (em - sm) / 60) * 100) / 100;
+  const now   = new Date();
+  const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+
+  return {
+    id:            Date.now(),
+    reqName, reqRole,
+    dept:          document.getElementById('dept').value,
+    line:          document.getElementById('line-sel').value,
+    otDate:        document.getElementById('ot-date').value,
+    otDateFmt:     formatDate(document.getElementById('ot-date').value),
+    startTime:     st, endTime: et,
+    hoursPlanned:  hrs,
+    staffCount:    staff,
+    manHours:      Math.round(hrs * staff * 100) / 100,
+    category:      document.getElementById('ot-category').value,
+    reason:        document.getElementById('ot-reason').value.trim(),
+    targetOutput:  document.getElementById('target-units').value,
+    approverName, approverRole,
+    notes:         document.getElementById('ot-notes').value.trim(),
+    status:        'Pending',
+    submittedAt:   timeStr,
+    submittedDate: now.toLocaleDateString('en-ZA')
+  };
+}
+
+// ── Post to Google Sheet ──────────────────────────────────────────────────────
+async function postToSheet(req) {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return true; // skip in dev
+  await fetch(APPS_SCRIPT_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(req)
+  });
+  return true; // no-cors always resolves; treat as success
+}
+
+// ── Submit to Sheet only ──────────────────────────────────────────────────────
+async function submitRequest() {
+  if (!validateForm()) return;
+
+  const req = buildReqObject();
+  setSubmitting(true);
+
+  try {
+    await postToSheet(req);
+    requests.unshift(req);
+    renderLog();
+    setSubmitting(false);
+    document.getElementById('success-detail').textContent =
+      req.reqName + ' — ' + req.otDateFmt + ' — ' + req.hoursPlanned + ' hrs × ' + req.staffCount + ' staff';
+    document.getElementById('success-msg').style.display = 'block';
+    setTimeout(() => { document.getElementById('success-msg').style.display = 'none'; }, 5000);
+    resetFormFields();
+  } catch(err) {
+    setSubmitting(false);
+    document.getElementById('error-msg').textContent = 'Could not reach Google Sheet. Request saved locally only.';
+    document.getElementById('error-msg').style.display = 'block';
+    requests.unshift(req);
+    renderLog();
+  }
+}
+
+// FIX: WA button now logs to sheet FIRST, then opens WhatsApp
+async function submitAndWhatsApp() {
+  if (!validateForm()) return;
+
+  const req = buildReqObject();
+  setSubmitting(true);
+
+  try {
+    await postToSheet(req);
+  } catch(err) {
+    // Log failure but don't block WA send — request saved locally
+  }
+
+  requests.unshift(req);
+  renderLog();
+  setSubmitting(false);
+
+  const msg = buildWAMessage(req);
+  document.getElementById('wa-preview-text').textContent = msg;
+  document.getElementById('wa-preview-box').style.display = 'block';
+
+  // FIX: phone number to be added later per approver
+  // Future format: const phone = approverParts[2]; wa.me/${phone}?text=...
+  const approverParts = document.getElementById('approver').value.split('|');
+  const phone = approverParts[2] || ''; // empty until numbers are added
+  const waUrl = phone
+    ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
+    : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+
+  window.open(waUrl, '_blank');
+
+  document.getElementById('success-detail').textContent =
+    req.reqName + ' — ' + req.otDateFmt + ' — Logged &amp; WhatsApp opened';
+  document.getElementById('success-msg').style.display = 'block';
+  setTimeout(() => { document.getElementById('success-msg').style.display = 'none'; }, 6000);
+  resetFormFields();
+}
+
+function setSubmitting(state) {
+  document.getElementById('sending-msg').style.display  = state ? 'block' : 'none';
+  document.getElementById('error-msg').style.display    = 'none';
+  document.getElementById('success-msg').style.display  = 'none';
+  document.getElementById('btn-submit').disabled = state;
+  document.getElementById('btn-wa').disabled     = state;
+}
+
+function resetFormFields() {
+  document.getElementById('ot-reason').value    = '';
+  document.getElementById('ot-notes').value     = '';
+  document.getElementById('ot-category').value  = '';
+  document.getElementById('target-units').value = '';
+}
+
+// ── WhatsApp message builder ──────────────────────────────────────────────────
+function buildWAMessage(req) {
+  let msg = `*LESCO MANUFACTURING*\n*Overtime Approval Request*\n`;
+  msg += `━━━━━━━━━━━━━━━━━\n`;
+  msg += `📅 Date of OT: ${req.otDateFmt}\n`;
+  msg += `👤 Requested by: ${req.reqName} (${req.reqRole})\n`;
+  msg += `🏭 Dept / Line: ${req.dept} — ${req.line}\n\n`;
+  msg += `*HOURS & STAFFING*\n━━━━━━━━━━━━━━━━━\n`;
+  msg += `⏰ Time: ${req.startTime} – ${req.endTime} (${req.hoursPlanned} hrs)\n`;
+  msg += `👷 Staff: ${req.staffCount} people\n`;
+  msg += `📊 Total man-hours: ${req.manHours} hrs\n\n`;
+  msg += `*REASON*\n━━━━━━━━━━━━━━━━━\n`;
+  msg += `📌 Category: ${req.category || '—'}\n`;
+  if (req.reason)       msg += `📝 Details: ${req.reason}\n`;
+  if (req.targetOutput) msg += `🎯 Target output: ${req.targetOutput}\n`;
+  msg += `\n*APPROVAL REQUIRED*\n━━━━━━━━━━━━━━━━━\n`;
+  msg += `⏳ Approver: ${req.approverName} (${req.approverRole})\n`;
+  msg += `📋 Status: *Pending approval*\n`;
+  if (req.notes) msg += `\n📎 Notes: ${req.notes}\n`;
+  msg += `\nSubmitted: ${req.submittedAt} on ${req.submittedDate}`;
+  return msg;
+}
+
+// ── Log rendering ─────────────────────────────────────────────────────────────
+function renderLog() {
+  const cont   = document.getElementById('log-entries');
+  const empty  = document.getElementById('log-empty');
+  const sumDiv = document.getElementById('log-summary');
+  document.getElementById('log-count').textContent = requests.length ? '(' + requests.length + ')' : '';
+
+  if (!requests.length) {
+    cont.innerHTML = ''; empty.style.display = 'block'; sumDiv.style.display = 'none'; return;
+  }
+  empty.style.display = 'none'; sumDiv.style.display = 'block';
+
+  cont.innerHTML = requests.map(r => `
+    <div class="log-entry">
+      <div class="log-time">Submitted ${r.submittedDate} at ${r.submittedAt}</div>
+      <div class="log-title">${r.reqName} — ${r.otDateFmt}</div>
+      <div class="log-pills">
+        <span class="pill">${r.dept} / ${r.line}</span>
+        <span class="pill">${r.startTime}–${r.endTime} (${r.hoursPlanned} hrs)</span>
+        <span class="pill">${r.staffCount} staff · ${r.manHours} man-hrs</span>
+        <span class="pill">${r.category}</span>
+        ${r.targetOutput ? '<span class="pill">'+r.targetOutput+'</span>' : ''}
+        <span class="pill pending">Approver: ${r.approverName} — ${r.status}</span>
+      </div>
+      ${r.reason ? '<div style="font-size:12px;color:#6b7280;margin-top:6px;font-style:italic">'+r.reason+'</div>' : ''}
+    </div>`).join('');
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function showTab(t) {
+  document.getElementById('pane-form').style.display = t === 'form' ? 'block' : 'none';
+  document.getElementById('pane-log').style.display  = t === 'log'  ? 'block' : 'none';
+  document.getElementById('tab-form').className = 'tab' + (t === 'form' ? ' active' : '');
+  document.getElementById('tab-log').className  = 'tab' + (t === 'log'  ? ' active' : '');
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function formatDate(val) {
+  if (!val) return '—';
+  const d = new Date(val + 'T00:00:00'); // FIX: force local timezone to avoid date shifting
+  return d.toLocaleDateString('en-ZA', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+}
+
+function exportCSV() {
+  if (!requests.length) { alert('No requests to export.'); return; }
+  const h = ['Submitted Date','Submitted At','Requested By','Role','Dept','Line','OT Date',
+             'Start Time','End Time','Hours Planned','Staff Count','Total Man-Hours',
+             'Category','Details','Target Output','Approver','Approver Role','Status','Notes'];
+  const rows = requests.map(r => [
+    r.submittedDate, r.submittedAt, r.reqName, r.reqRole, r.dept, r.line, r.otDate,
+    r.startTime, r.endTime, r.hoursPlanned, r.staffCount, r.manHours,
+    r.category, '"'+(r.reason||'')+'"', r.targetOutput,
+    r.approverName, r.approverRole, r.status, '"'+(r.notes||'')+'"'
+  ]);
+  const csv = [h.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = 'Lesco_Overtime_Requests_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+function clearLog() {
+  if (!requests.length) return;
+  if (!confirm('Clear all ' + requests.length + ' requests from this session?')) return;
+  requests = [];
+  document.getElementById('wa-preview-box').style.display = 'none';
+  renderLog();
+}
+
+// ── Clock ─────────────────────────────────────────────────────────────────────
+function tick() {
+  const n = new Date();
+  document.getElementById('clock').textContent = n.getHours().toString().padStart(2,'0') + ':' + n.getMinutes().toString().padStart(2,'0');
+  const days   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('dateline').textContent = days[n.getDay()] + ' ' + n.getDate() + ' ' + months[n.getMonth()] + ' ' + n.getFullYear();
+}
+tick();
+setInterval(tick, 30000);
+</script>
+</body>
+</html>
